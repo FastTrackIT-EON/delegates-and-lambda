@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,30 +22,22 @@ namespace DelegatesAndLambda
             //SumOfThreeNumbers varFunction = math.Sum;
             //int result = varFunction.Invoke(1, 2, 3);
 
-            SumOfThreeNumbers varFunction = delegate (int x, int y, int z)
-            {
-                return x + y + z;
-            };
+            SumOfThreeNumbers varFunction = (x, y, z) => x + y + z;
 
             int result = varFunction.Invoke(1, 2, 3);
 
             int[] array = new[] { 1, 2, 3 };
 
-            Action<int> actOnElement = delegate (int element)
-            {
-                Console.WriteLine(element);
-            };
+            array.ForEach(element => Console.WriteLine(element));
 
-            array.ForEach(actOnElement);
+            // Func<int, bool> isEvenNumber = CheckNumberIsEven;
+            //Func<int, bool> anyDivisorOf3 = delegate (int number)
+            //{
+            //    return AnyDivisorOf(number, 3);
+            //};
 
-            Func<int, bool> isEvenNumber = CheckNumberIsEven;
-            Func<int, bool> anyDivisorOf3 = delegate (int number)
-            {
-                return AnyDivisorOf(number, 3);
-            };
-
-            bool areAnyEvenNumbers = array.HasMatch(isEvenNumber);
-            bool areAnyDivisorsOf3 = array.HasMatch(anyDivisorOf3);
+            bool areAnyEvenNumbers = array.HasMatch(nr => nr % 2 == 0);
+            bool areAnyDivisorsOf3 = array.HasMatch(nr => AnyDivisorOf(nr, 3));
             Console.WriteLine($"Are there any even numbers: {areAnyEvenNumbers}");
 
 
@@ -82,15 +75,41 @@ namespace DelegatesAndLambda
                 }
             };
 
-            Func<Product, bool> keepOnlyLaptops = delegate (Product p)
-            {
-                return string.Equals(p.Category, "Laptops", StringComparison.OrdinalIgnoreCase);
-            };
+            //Func<Product, bool> keepOnlyLaptops = delegate (Product p)
+            //{
+            //    return string.Equals(p.Category, "Laptops", StringComparison.OrdinalIgnoreCase);
+            //};
 
-            foreach(Product laptops in products.Filter(keepOnlyLaptops))
+            foreach(Product laptops in products.Filter(prod => string.Equals(prod.Category, "Laptops", StringComparison.OrdinalIgnoreCase)))
             {
                 Console.WriteLine($"#{laptops.Id} - {laptops.Name}, Category: {laptops.Category}");
             }
+
+            int val = 10;
+            Action action1 = () =>
+            {
+                val = 20;
+                Console.WriteLine($"Value is: {val}");
+            };
+
+            val = 11;
+            action1();
+            Console.WriteLine($"After lambda value is: {val}");
+
+            // atention to variable capture when building delegates in loops!
+            List<Action> listOfPrintActions = new List<Action>();
+            for (int i = 0; i < 5; i++)
+            {
+                int temp = i;
+
+                listOfPrintActions.Add(
+                    () => 
+                    {
+                        Console.WriteLine(temp);
+                    });
+            }
+
+            listOfPrintActions.ForEach(a => a());
 
             Console.ReadKey();
         }
